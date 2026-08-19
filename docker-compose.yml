@@ -1,0 +1,22 @@
+services:
+  db:
+    # pgvector/pgvector = PostgreSQL + vector extension (HNSW / cosine)
+    image: pgvector/pgvector:pg16
+    container_name: retroflow-postgres
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: retroflow
+      POSTGRES_PASSWORD: retroflow
+      POSTGRES_DB: retroflow
+    volumes:
+      - retroflow_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U retroflow -d retroflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  retroflow_pgdata:

@@ -1,0 +1,51 @@
+# Local documentation and editor instructions
+/docs/
+/.cursor/
+/.claude/
+/apps/web/AGENTS.md
+/apps/web/CLAUDE.md
+
+# Secrets and local configuration
+**/.env
+**/.env.local
+**/.env.*.local
+!.env.example
+!apps/web/.env.example
+!apps/api/.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Dependencies and generated output
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.next/
+out/
+dist/
+build/
+coverage/
+htmlcov/
+.coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.turbo/
+
+# Local data and logs
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# IDE and OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
