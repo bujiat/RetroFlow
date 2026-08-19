@@ -4,6 +4,8 @@
 
 登录后：新建复盘 → 分析 → 确认并发布行动 → 提交证据并验收。趋势、助手、周复盘从同一套数据读出。未配置 LLM 时，登录和列表仍可用。
 
+在线试用：[https://retro-flow-seven.vercel.app/zh-CN](https://retro-flow-seven.vercel.app/zh-CN)。自行注册。分析依赖云端额度，用尽后分析会失败；登录和列表仍可能可用。试用实例可能随时下线。
+
 ## 环境
 
 - Node.js 22、pnpm 9
