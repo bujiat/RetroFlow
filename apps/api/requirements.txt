@@ -1,0 +1,15 @@
+# Railpack only pip-installs when this file exists.
+# pyproject.toml without poetry.lock / uv.lock / pdm.lock does not install deps.
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic-settings>=2.6.0
+pydantic[email]>=2.0.0
+httpx>=0.28.0
+openai>=1.50.0
+pgvector>=0.3.6
+langchain-text-splitters>=0.3.0
+sqlalchemy>=2.0.36
+psycopg[binary]>=3.2.0
+alembic>=1.14.0
+bcrypt>=4.2.0
+PyJWT>=2.9.0
