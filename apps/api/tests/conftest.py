@@ -21,6 +21,11 @@ RegisterFn = Callable[[str], tuple[AuthHeader, dict]]
 
 
 @pytest.fixture(autouse=True)
+def disable_demo_seed(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "seed_demo_on_start", False)
+
+
+@pytest.fixture(autouse=True)
 def test_jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "jwt_secret", "test-secret-key-for-jwt-validation-123")
 

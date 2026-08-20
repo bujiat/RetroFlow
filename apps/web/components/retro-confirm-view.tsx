@@ -16,6 +16,16 @@ import {
   publishRetro,
   type RetroDetail,
 } from "@/lib/api/retros";
+import type { AnalysisSummary } from "@/types";
+
+function summaryHasItems(summary: AnalysisSummary | null): boolean {
+  if (!summary) return false;
+  return (
+    summary.keep.length > 0 ||
+    summary.decisions.length > 0 ||
+    summary.risks.length > 0
+  );
+}
 
 type RetroConfirmViewProps = {
   retroId: string;
@@ -261,7 +271,9 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
     }
 
     if (actions.length === 0) {
-      setError(t("publishNeedActions"));
+      const extractedEmpty =
+        retro.problems.length === 0 && !summaryHasItems(retro.analysis_summary);
+      setError(extractedEmpty ? t("extractEmptyHint") : t("publishNeedActions"));
       return;
     }
     if (actions.length > 3) {
@@ -323,6 +335,8 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
   const visibleProblems = retro.problems.filter(
     (p) => p.disposition !== "discarded" && !discardedProblems.has(p.id),
   );
+  const extractionEmpty =
+    ready && retro.problems.length === 0 && !summaryHasItems(summary);
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -384,7 +398,22 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
         </div>
       ) : null}
 
-      {summary ? (
+      {extractionEmpty ? (
+        <div className="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-medium text-amber-950">{t("extractEmptyTitle")}</p>
+          <p className="text-sm text-amber-900">{t("extractEmptyHint")}</p>
+          <button
+            type="button"
+            disabled={analyzing || publishing}
+            onClick={() => void onRetryAnalyze()}
+            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+          >
+            {analyzing ? t("analyzing") : t("retryAnalyze")}
+          </button>
+        </div>
+      ) : null}
+
+      {summary && summaryHasItems(summary) ? (
         <section className="space-y-4">
           <h2 className="text-sm font-medium text-zinc-900">{t("summaryHeading")}</h2>
           {summary.keep.length > 0 ? (

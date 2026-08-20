@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     jwt_secret: str = _DEVELOPMENT_JWT_SECRET
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 60
+    seed_demo_on_start: bool = True
 
     llm_provider: str = "deepseek"
     llm_api_key: str = ""

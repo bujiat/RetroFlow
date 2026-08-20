@@ -4,7 +4,7 @@
 
 登录后：新建复盘 → 分析 → 确认并发布行动 → 提交证据并验收。趋势、助手、周复盘从同一套数据读出。未配置 LLM 时，登录和列表仍可用。
 
-在线试用：[https://retro-flow-seven.vercel.app/zh-CN](https://retro-flow-seven.vercel.app/zh-CN)。自行注册。分析依赖云端额度，用尽后分析会失败；登录和列表仍可能可用。试用实例可能随时下线。
+在线试用：[https://retro-flow-seven.vercel.app/zh-CN](https://retro-flow-seven.vercel.app/zh-CN)。分析依赖云端额度，用尽后分析会失败；登录和列表仍可能可用。试用实例可能随时下线。
 
 ## 环境
 
@@ -51,22 +51,28 @@ ollama pull nomic-embed-text
 
 `.env` 从 `.env.example` 复制，不要提交。常用项：
 
-| 文件 | 变量 | 本地值 |
-|------|------|--------|
-| `apps/api/.env` | `DATABASE_URL` | Docker Postgres，`localhost:5433` |
-| | `CORS_ORIGINS` | `http://localhost:3000` |
-| | `LLM_API_KEY` | DeepSeek 密钥 |
-| | `EMBEDDING_PROVIDER` | `ollama` |
-| `apps/web/.env` | `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000/api/v1` |
+
+| 文件              | 变量                         | 本地值                              |
+| --------------- | -------------------------- | -------------------------------- |
+| `apps/api/.env` | `DATABASE_URL`             | Docker Postgres，`localhost:5433` |
+|                 | `CORS_ORIGINS`             | `http://localhost:3000`          |
+|                 | `LLM_API_KEY`              | DeepSeek 密钥                      |
+|                 | `EMBEDDING_PROVIDER`       | `ollama`                         |
+| `apps/web/.env` | `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:8000/api/v1`   |
+
+
+
 
 ## 演示账号
+
+API 启动时会自动准备 `demo@example.com` / `demo1234` 和一组示例复盘。账号已存在时只校正密码，不会覆盖这个账号下已有的数据。
+
+若要强制重建示例（会删掉并重建这个账号）：
 
 ```powershell
 cd apps/api
 python -m app.seed_demo
 ```
-
-`demo@example.com` / `demo1234`。脚本可重复跑，只会删掉并重建这个账号。
 
 助手要搜原文需要向量索引：先启动 Ollama，再执行：
 
@@ -74,6 +80,8 @@ python -m app.seed_demo
 $env:DEMO_INDEX_CONTENT="true"
 python -m app.seed_demo
 ```
+
+
 
 ## 检查
 
@@ -86,3 +94,4 @@ cd ../web
 pnpm lint
 pnpm build
 ```
+

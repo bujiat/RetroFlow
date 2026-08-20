@@ -58,6 +58,8 @@ export default async function HomePage({ params }: Props) {
           />
         </div>
 
+        <p className="mt-4 text-sm text-zinc-500">{t("demoAccount")}</p>
+
         <ul className="mt-14 grid w-full gap-3 text-left text-sm text-zinc-700 sm:grid-cols-3 sm:gap-4">
           {questions.map((item) => (
             <li

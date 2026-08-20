@@ -6,10 +6,13 @@ from app.core.errors import api_error
 from app.core.security import create_access_token, hash_password, verify_password
 from app.repositories import users as users_repo
 from app.schemas.auth import AuthResponse, LoginRequest, RegisterRequest, UserPublic
+from app.seed_demo import DEMO_EMAIL
 
 
 def register_user(db: Session, payload: RegisterRequest) -> AuthResponse:
     email = payload.email.lower().strip()
+    if email == DEMO_EMAIL:
+        raise api_error(status.HTTP_409_CONFLICT, "email_already_registered")
     existing = users_repo.get_user_by_email(db, email)
     if existing is not None:
         raise api_error(status.HTTP_409_CONFLICT, "email_already_registered")

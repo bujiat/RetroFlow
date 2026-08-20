@@ -35,6 +35,7 @@ _NORMALIZED = "release checklist items are skipped before deploy"
 
 
 def seed_demo(db: Session) -> User:
+    """Replace the demo user and recreate the sample story."""
     today = datetime.now(UTC).date()
     week_start = today - timedelta(days=today.weekday())
     week_end = week_start + timedelta(days=6)
@@ -309,6 +310,24 @@ def seed_demo(db: Session) -> User:
     db.commit()
     db.refresh(user)
     return user
+
+
+def ensure_demo_account(db: Session) -> User:
+    """Keep demo@example.com / demo1234 available without wiping existing sample data.
+
+    Creates the user and story if missing. If the user exists but has no retros,
+    rebuilds the story. Always resets the password so the published credentials work.
+    """
+    existing = db.scalar(select(User).where(User.email == DEMO_EMAIL))
+    if existing is None:
+        return seed_demo(db)
+
+    existing.password_hash = hash_password(DEMO_PASSWORD)
+    has_retro = db.scalar(select(Retro.id).where(Retro.user_id == existing.id).limit(1))
+    db.commit()
+    if has_retro is None:
+        return seed_demo(db)
+    return existing
 
 
 def _at(day: date, hour: int = 8) -> datetime:

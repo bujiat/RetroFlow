@@ -11,6 +11,9 @@ import { getAccessToken, setAccessToken } from "@/lib/auth-token";
 
 type AuthMode = "login" | "register";
 
+const DEMO_EMAIL = "demo@example.com";
+const DEMO_PASSWORD = "demo1234";
+
 export function LoginForm() {
   const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
@@ -139,6 +142,26 @@ export function LoginForm() {
         ) : null}
 
         {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+        {isLogin ? (
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-left text-sm text-zinc-600">
+            <p>{t("demoHint")}</p>
+            <p className="mt-1 font-mono text-zinc-800">
+              {DEMO_EMAIL} / {DEMO_PASSWORD}
+            </p>
+            <button
+              type="button"
+              className="mt-2 text-zinc-900 underline-offset-4 hover:underline"
+              onClick={() => {
+                setEmail(DEMO_EMAIL);
+                setPassword(DEMO_PASSWORD);
+                setError(null);
+              }}
+            >
+              {t("demoFill")}
+            </button>
+          </div>
+        ) : null}
 
         <button
           type="submit"

@@ -64,17 +64,26 @@ export function RetrosList() {
       ) : (
         <ul className="divide-y border-y border-zinc-200">
           {items.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => router.push(`/retro/${item.id}/confirm`)}
-                className="flex w-full flex-col gap-1 py-4 text-left hover:bg-zinc-50"
+                className="flex min-w-0 flex-1 flex-col gap-1 py-4 text-left hover:bg-zinc-50"
               >
                 <span className="font-medium text-zinc-950">{item.title}</span>
                 <span className="text-sm text-zinc-500">
                   {item.review_date} · {item.status}
                 </span>
               </button>
+              {item.status !== "published" ? (
+                <button
+                  type="button"
+                  onClick={() => router.push(`/retro/${item.id}/confirm`)}
+                  className="mr-1 shrink-0 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                >
+                  {t("publish")}
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>
