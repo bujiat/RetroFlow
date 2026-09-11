@@ -1,18 +1,156 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-cream: #fffbf5;
+  --color-coral: #ff6b4a;
+  --color-coral-light: #ff8b6f;
+  --color-sun: #ffb830;
+  --color-sun-light: #ffd07a;
+  --color-mint: #3ecfa0;
+  --color-plum: #7c5cbf;
+  --color-sky: #4aafff;
+  --color-ink: #2d1f14;
+  --color-sand: #f5e8d4;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
 }
 
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  height: 100%;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.rf-h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.rf-lede {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(45 31 20 / 0.5);
+}
+
+.rf-card {
+  border-radius: 1.5rem;
+  border: 2px solid rgb(45 31 20 / 0.06);
+  background: white;
+}
+
+.rf-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-coral);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgb(255 107 74 / 0.3);
+  cursor: pointer;
+}
+
+.rf-btn-primary:hover {
+  background: var(--color-coral-light);
+}
+
+.rf-btn-primary:disabled {
+  opacity: 0.6;
+}
+
+.rf-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid rgb(45 31 20 / 0.1);
+  background: white;
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rf-btn-ink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-ink);
+  color: var(--color-cream);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rf-input {
+  width: 100%;
+  border-radius: 1rem;
+  border: 2px solid transparent;
+  background: rgb(245 232 212 / 0.5);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  outline: none;
+}
+
+.rf-input:focus {
+  border-color: var(--color-coral);
+  background: white;
+}
+
+.rf-chip {
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.rf-blob {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+}
+
+.rf-stat {
+  border-radius: 1.5rem;
+  border: 2px solid rgb(45 31 20 / 0.06);
+  background: white;
+  padding: 1.25rem 1.5rem;
+}
+
+.rf-check {
+  display: flex;
+  height: 1.5rem;
+  width: 1.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.rf-avatar {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: white;
 }

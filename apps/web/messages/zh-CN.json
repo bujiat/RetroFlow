@@ -28,10 +28,42 @@
     "checking": "正在确认登录状态…"
   },
   "home": {
+    "badge": "会议复盘工作台",
     "title": "别让同一个问题，出现在每次复盘里",
+    "titleLead": "别让同一个问题",
+    "titleAccent": "出现在每次复盘里",
     "subtitle": "识别重复问题 · 追踪改进行动 · 用证据完成验收",
     "ctaPrimary": "开始使用",
     "ctaSecondary": "查看示例",
+    "ctaStripEyebrow": "从记录到验收",
+    "ctaStripTitle": "让每次会议真正留下可跟进的改变",
+    "featuresHeading": "它帮你盯住的事",
+    "features": [
+      {
+        "icon": "🔁",
+        "color": "#FF6B4A",
+        "title": "识别重复问题",
+        "desc": "把这次会议里的问题，和历史上相似的主题对上。"
+      },
+      {
+        "icon": "🎯",
+        "color": "#FFB830",
+        "title": "追踪改进行动",
+        "desc": "负责人、期限、状态都在一块板上，不再散落在纪要里。"
+      },
+      {
+        "icon": "✅",
+        "color": "#3ECFA0",
+        "title": "用证据验收",
+        "desc": "完成不等于结束。链接、说明提交后，才能标成已验收。"
+      },
+      {
+        "icon": "🤖",
+        "color": "#7C5CBF",
+        "title": "问你的复盘历史",
+        "desc": "只检索你自己的复盘与行动，回答带来源。"
+      }
+    ],
     "demoAccount": "试用：demo@example.com / demo1234",
     "questions": [
       "以前发生过吗？",
@@ -56,6 +88,9 @@
     "demoAskA": "上次只补了 PR 模板检查，CI 仍缺少 migration 门禁；相关证据尚未验收。"
   },
   "auth": {
+    "welcomeBack": "欢迎回来",
+    "createAccount": "创建账号",
+    "quoteMark": "“",
     "loginTitle": "登录",
     "registerTitle": "注册",
     "email": "邮箱",
@@ -78,11 +113,19 @@
   },
   "retros": {
     "title": "复盘",
+    "countLine": "{count} 场复盘",
     "empty": "暂无复盘",
-    "new": "新建",
+    "new": "新建复盘",
     "publish": "发布",
     "loading": "加载中…",
-    "loadFailed": "加载复盘列表失败，请稍后重试"
+    "loadFailed": "加载复盘列表失败，请稍后重试",
+    "status": {
+      "draft": "草稿",
+      "analyzing": "分析中",
+      "analysis_failed": "分析失败",
+      "ready_for_review": "待发布",
+      "published": "已发布"
+    }
   },
   "retroNew": {
     "pageTitle": "新建复盘",
@@ -113,8 +156,8 @@
     "keepHeading": "做得好的",
     "decisionsHeading": "决策",
     "risksHeading": "风险",
-    "problemsHeading": "问题与候选行动",
-    "actionsHeading": "候选行动",
+    "problemsHeading": "问题",
+    "actionsHeading": "行动",
     "successCriteria": "成功标准",
     "analyzeFailed": "分析失败，请重试",
     "analyzeFailedHint": "分析未成功",
@@ -123,15 +166,15 @@
     "noAnalysisYet": "尚未分析",
     "analyzingStuckHint": "分析可能已中断，可重试",
     "llmNotConfigured": "未配置 LLM：请在 apps/api/.env 设置 LLM_API_KEY 后重启 API",
-    "removeProblem": "移除问题",
-    "removeAction": "移除行动",
+    "removeProblem": "移除",
+    "removeAction": "移除",
     "owner": "负责人",
     "ownerPlaceholder": "姓名或邮箱",
     "dueDate": "期限",
     "publish": "发布改进行动",
     "publishing": "发布中…",
     "saveForLater": "稍后再说",
-    "publishHint": "最多发布 3 条行动；请为每条填写负责人、期限与成功标准。",
+    "publishHint": "最多 3 条，每条需负责人、期限和成功标准。",
     "extractEmptyTitle": "这次没有提取出内容",
     "extractEmptyHint": "会议原文可能太短，或没有写到具体问题和可执行的改进。请补充更完整的记录后点「重新分析」。",
     "publishFieldsRequired": "请为要发布的行动填写负责人、期限和成功标准",
@@ -186,27 +229,39 @@
     "showTimeline": "查看时间线",
     "hideTimeline": "收起时间线",
     "actionFailed": "操作失败，请重试",
-    "eventsFailed": "加载时间线失败"
+    "eventsFailed": "加载时间线失败",
+    "progress": "已验收 {done} / {total}",
+    "weekWatch": "本周待跟进 {count} 项",
+    "status": {
+      "open": "待开始",
+      "in_progress": "进行中",
+      "evidence_submitted": "待验收",
+      "verified": "已完成",
+      "cancelled": "已取消"
+    }
   },
   "trends": {
     "title": "改进趋势",
+    "lede": "用已发生的复盘和行动，看改进有没有落地",
     "loading": "加载中…",
     "loadFailed": "加载趋势失败，请稍后重试",
-    "overdue": "逾期行动",
+    "overdue": "逾期",
     "awaitingVerify": "待验收",
-    "verificationRate": "行动验收率",
-    "awaitingWork": "待执行",
+    "verificationRate": "验收率",
+    "awaitingWork": "进行中",
     "verified": "已验收",
     "cancelled": "已取消",
     "publishedRetros": "已发布复盘",
-    "keptProblems": "保留问题次数",
+    "keptProblems": "保留问题",
     "recurringClusters": "复发主题",
-    "topClusters": "问题主题（按出现次数）",
-    "noClusters": "暂无问题主题",
+    "mixTitle": "行动完成情况",
+    "clusterChartTitle": "问题主题出现次数",
+    "topClusters": "问题主题",
+    "noClusters": "还没有问题主题",
     "occurrenceCount": "{count} 次",
     "overdueList": "逾期清单",
-    "noOverdue": "当前没有逾期行动",
-    "goActions": "前往改进行动 →",
+    "noOverdue": "没有逾期行动",
+    "goActions": "去行动板 →",
     "due": "截止"
   },
   "assistant": {
@@ -230,27 +285,42 @@
     }
   },
   "weeklyReview": {
-    "title": "AI 周复盘",
-    "thisWeek": "本自然周",
+    "title": "AI 周复盘报告",
+    "aiBadge": "AI 智能生成 · 本周事实",
+    "lede": "根据本周复盘和行动自动综合",
+    "thisWeek": "本周",
     "backWeek": "← 改进行动",
     "loading": "加载中…",
     "loadFailed": "加载周复盘失败",
-    "emptyHint": "还没有保存过本周复盘。",
-    "emptyHint2": "点「生成」会按本周事实写一份草稿；改完后再保存。",
-    "generate": "生成周复盘",
+    "emptyHint": "还没有本周报告。",
+    "emptyHint2": "生成后会按本周事实写成草稿，改完再保存。",
+    "generate": "生成报告",
     "regenerate": "重新生成",
     "regenConfirm": "重新生成会丢掉当前未保存的编辑，确定吗？",
     "edit": "编辑",
     "contentLabel": "周复盘内容",
-    "save": "保存本周复盘",
+    "save": "保存",
     "generateFailed": "生成失败，请稍后重试",
     "saveFailed": "保存失败，请稍后重试",
     "emptyContent": "内容不能为空",
-    "draftBadge": "草稿（尚未保存）",
+    "draftBadge": "草稿",
     "savedBadge": "已保存",
-    "insufficientEvidence": "本周事实不足，生成结果依据有限。",
+    "insufficientEvidence": "本周事实不足，依据有限。",
+    "metricVerified": "已验收",
+    "metricOverdue": "逾期",
+    "metricAwaiting": "待验收",
+    "metricSources": "引用来源",
+    "hlCompleted": "本周完成",
+    "hlRisks": "主要阻碍",
+    "hlRecurring": "重复问题",
+    "insightsTitle": "AI 深度洞察",
+    "insightsCount": "{count} 条来源",
+    "badgeTrend": "趋势预警",
+    "badgeAdvice": "AI 建议",
+    "badgeNote": "值得关注",
+    "nextWeekTitle": "下周重点关注",
     "citations": "来源",
-    "openSource": "查看来源 →"
+    "openSource": "查看"
   }
 }
 

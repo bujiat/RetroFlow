@@ -23,7 +23,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, [hasToken, hydrated, router]);
 
   if (!hasToken) {
-    return <p className="text-sm text-zinc-500">{t("checking")}</p>;
+    return <p className="rf-lede p-8">{t("checking")}</p>;
   }
 
   return children;

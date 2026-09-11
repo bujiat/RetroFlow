@@ -46,8 +46,18 @@ function defaultDueDate(): string {
   return `${y}-${m}-${day}`;
 }
 
+const TYPE_META: Record<string, { emoji: string; labelKey: "typeSprint" | "typeIncident" | "typeRelease" }> = {
+  sprint: { emoji: "🚀", labelKey: "typeSprint" },
+  incident: { emoji: "⚙️", labelKey: "typeIncident" },
+  release: { emoji: "🎨", labelKey: "typeRelease" },
+};
+
+const STATUS_KEYS = ["draft", "analyzing", "analysis_failed", "ready_for_review", "published"] as const;
+
 export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
   const t = useTranslations("retroConfirm");
+  const tStatus = useTranslations("retros");
+  const tType = useTranslations("retroNew");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const [retro, setRetro] = useState<RetroDetail | null>(null);
@@ -309,16 +319,16 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
   if (error && !retro) {
     return (
       <div className="space-y-4">
-        <Link href="/retros" className="text-sm text-zinc-600 hover:text-zinc-950">
+        <Link href="/retros" className="text-sm font-semibold text-ink/50 hover:text-ink">
           {t("back")}
         </Link>
-        <p className="text-sm text-red-600">{error}</p>
+        <p className="text-sm font-semibold text-coral">{error}</p>
       </div>
     );
   }
 
   if (!retro) {
-    return <p className="text-sm text-zinc-500">{t("loading")}</p>;
+    return <p className="rf-lede">{t("loading")}</p>;
   }
 
   const summary = retro.analysis_summary;
@@ -338,44 +348,44 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
   const extractionEmpty =
     ready && retro.problems.length === 0 && !summaryHasItems(summary);
 
+  const typeMeta = TYPE_META[retro.type] ?? TYPE_META.sprint;
+  const statusLabel = STATUS_KEYS.includes(retro.status as (typeof STATUS_KEYS)[number])
+    ? tStatus(`status.${retro.status as (typeof STATUS_KEYS)[number]}`)
+    : retro.status;
+
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <div>
-        <Link href="/retros" className="text-sm text-zinc-600 hover:text-zinc-950">
-          {t("back")}
-        </Link>
-        <h1 className="mt-3 text-xl font-semibold tracking-tight text-zinc-950">
-          {retro.title}
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          {retro.type} · {retro.review_date} · {retro.status}
-        </p>
-      </div>
-
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-      {published ? (
-        <div className="border-t border-zinc-200 pt-4">
-          <Link
-            href="/actions/board"
-            className="text-sm font-medium text-zinc-950 underline-offset-4 hover:underline"
-          >
+    <div className="space-y-5 pb-24">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <Link href="/retros" className="text-sm font-semibold text-ink/50 hover:text-ink">
+            {t("back")}
+          </Link>
+          <h1 className="rf-h1 mt-2">{retro.title}</h1>
+          <p className="mt-2 flex flex-wrap items-center gap-2 text-sm font-medium text-ink/45">
+            <span className="rf-chip bg-sand text-ink">
+              {typeMeta.emoji} {tType(typeMeta.labelKey)}
+            </span>
+            <span>{retro.review_date}</span>
+            <span className="rf-chip bg-sand">{statusLabel}</span>
+          </p>
+        </div>
+        {published ? (
+          <Link href="/actions/board" className="rf-btn-primary px-4 py-2">
             {t("goActions")}
           </Link>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
+
+      {error ? <p className="text-sm font-semibold text-coral">{error}</p> : null}
 
       {failed ? (
-        <div className="space-y-3 rounded-md border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-700">
-            {t("analyzeFailedHint")}
-            {retro.analysis_error ? ` (${retro.analysis_error})` : ""}
-          </p>
+        <div className="rf-card flex flex-wrap items-center justify-between gap-3 bg-[#fff1ed] p-4">
+          <p className="text-sm font-medium text-coral">{t("analyzeFailedHint")}</p>
           <button
             type="button"
             disabled={analyzing}
             onClick={() => void onRetryAnalyze()}
-            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+            className="rf-btn-primary px-4 py-2"
           >
             {analyzing ? t("analyzing") : t("retryAnalyze")}
           </button>
@@ -383,15 +393,15 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
       ) : null}
 
       {showRetryAnalyze && !failed ? (
-        <div className="space-y-3 rounded-md border border-zinc-200 bg-zinc-50 p-4">
-          <p className="text-sm text-zinc-600">
+        <div className="rf-card flex flex-wrap items-center justify-between gap-3 bg-sand/50 p-4">
+          <p className="text-sm text-ink/70">
             {retro.status === "analyzing" ? t("analyzingStuckHint") : t("noAnalysisYet")}
           </p>
           <button
             type="button"
             disabled={analyzing}
             onClick={() => void onRetryAnalyze()}
-            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+            className="rf-btn-primary px-4 py-2"
           >
             {analyzing ? t("analyzing") : t("retryAnalyze")}
           </button>
@@ -399,14 +409,14 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
       ) : null}
 
       {extractionEmpty ? (
-        <div className="space-y-3 rounded-md border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-950">{t("extractEmptyTitle")}</p>
-          <p className="text-sm text-amber-900">{t("extractEmptyHint")}</p>
+        <div className="rf-card space-y-3 border-sun/40 bg-[#fff8ea] p-4">
+          <p className="text-sm font-bold text-ink">{t("extractEmptyTitle")}</p>
+          <p className="text-sm text-ink/70">{t("extractEmptyHint")}</p>
           <button
             type="button"
             disabled={analyzing || publishing}
             onClick={() => void onRetryAnalyze()}
-            className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+            className="rf-btn-primary px-4 py-2"
           >
             {analyzing ? t("analyzing") : t("retryAnalyze")}
           </button>
@@ -414,14 +424,11 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
       ) : null}
 
       {summary && summaryHasItems(summary) ? (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-zinc-900">{t("summaryHeading")}</h2>
+        <section className="grid gap-3 sm:grid-cols-3">
           {summary.keep.length > 0 ? (
-            <div>
-              <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t("keepHeading")}
-              </h3>
-              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-800">
+            <div className="rounded-3xl p-4" style={{ background: "#EDFAF5", border: "2px solid #3ECFA022" }}>
+              <p className="text-xs font-extrabold text-[#2a9a74]">{t("keepHeading")}</p>
+              <ul className="mt-2 space-y-1.5 text-sm font-medium text-ink">
                 {summary.keep.map((item) => (
                   <li key={item}>{item}</li>
                 ))}
@@ -429,31 +436,21 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
             </div>
           ) : null}
           {summary.decisions.length > 0 ? (
-            <div>
-              <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t("decisionsHeading")}
-              </h3>
-              <ul className="mt-2 space-y-2 text-sm text-zinc-800">
+            <div className="rounded-3xl p-4" style={{ background: "#EEF7FF", border: "2px solid #4AAFFF22" }}>
+              <p className="text-xs font-extrabold text-[#2b7ec4]">{t("decisionsHeading")}</p>
+              <ul className="mt-2 space-y-1.5 text-sm font-medium text-ink">
                 {summary.decisions.map((item) => (
-                  <li key={`${item.decision}-${item.reason}`}>
-                    <p className="font-medium">{item.decision}</p>
-                    <p className="text-zinc-600">{item.reason}</p>
-                  </li>
+                  <li key={`${item.decision}-${item.reason}`}>{item.decision}</li>
                 ))}
               </ul>
             </div>
           ) : null}
           {summary.risks.length > 0 ? (
-            <div>
-              <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                {t("risksHeading")}
-              </h3>
-              <ul className="mt-2 space-y-2 text-sm text-zinc-800">
+            <div className="rounded-3xl p-4" style={{ background: "#FFF0EC", border: "2px solid #FF6B4A22" }}>
+              <p className="text-xs font-extrabold text-coral">{t("risksHeading")}</p>
+              <ul className="mt-2 space-y-1.5 text-sm font-medium text-ink">
                 {summary.risks.map((item) => (
-                  <li key={`${item.risk}-${item.suggestion}`}>
-                    <p className="font-medium">{item.risk}</p>
-                    <p className="text-zinc-600">{item.suggestion}</p>
-                  </li>
+                  <li key={`${item.risk}-${item.suggestion}`}>{item.risk}</li>
                 ))}
               </ul>
             </div>
@@ -462,45 +459,43 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
       ) : null}
 
       {visibleProblems.length > 0 ? (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-zinc-900">{t("problemsHeading")}</h2>
-          <ul className="space-y-6">
+        <section className="space-y-3">
+          <h2 className="text-sm font-extrabold text-ink">
+            {t("problemsHeading")}
+            <span className="ml-2 font-medium text-ink/35">{visibleProblems.length}</span>
+          </h2>
+          <ul className="space-y-3">
             {visibleProblems.map((problem, index) => {
               const visibleActions = problem.suggested_actions.filter(
                 (a) => !discardedActions.has(a.id),
               );
               return (
-                <li key={problem.id} className="space-y-3 border-t border-zinc-200 pt-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="font-medium text-zinc-950">
-                        {index + 1}. {problem.title}
-                      </p>
-                      <p className="mt-1 text-sm text-zinc-500">
-                        {problem.category} · {problem.severity}
-                      </p>
-                      <p className="mt-2 text-sm text-zinc-700">
-                        {problem.normalized_statement}
-                      </p>
-                      <p className="mt-2 text-sm text-zinc-600">
-                        <span className="font-medium text-zinc-800">{t("clusterLabel")}: </span>
-                        {problem.cluster_title ?? t("clusterNone")}
+                <li key={problem.id} className="rf-card space-y-3 p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-coral text-xs font-bold text-white">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-extrabold text-ink">{problem.title}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                        {problem.cluster_title ? (
+                          <span className="rf-chip bg-plum/15 text-plum">{problem.cluster_title}</span>
+                        ) : (
+                          <span className="rf-chip bg-sand text-ink/40">{t("clusterNone")}</span>
+                        )}
                         {ready ? (
-                          <>
-                            {" · "}
-                            <button
-                              type="button"
-                              disabled={clusterBusy}
-                              onClick={() => void openClusterEditor(problem.id)}
-                              className="text-zinc-900 underline-offset-2 hover:underline"
-                            >
-                              {t("clusterChange")}
-                            </button>
-                          </>
+                          <button
+                            type="button"
+                            disabled={clusterBusy}
+                            onClick={() => void openClusterEditor(problem.id)}
+                            className="font-semibold text-coral hover:underline"
+                          >
+                            {t("clusterChange")}
+                          </button>
                         ) : null}
-                      </p>
+                      </div>
                       {editingClusterFor === problem.id ? (
-                        <div className="mt-2 space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm">
+                        <div className="mt-2 space-y-2 rounded-2xl bg-sand/60 p-3 text-sm">
                           <ul className="max-h-40 space-y-1 overflow-y-auto">
                             {clusterOptions.map((c) => (
                               <li key={c.id}>
@@ -508,13 +503,10 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
                                   type="button"
                                   disabled={clusterBusy}
                                   onClick={() => void applyClusterLink(problem.id, c.id)}
-                                  className="w-full rounded px-2 py-1 text-left hover:bg-white disabled:opacity-60"
+                                  className="w-full rounded-xl px-2 py-1 text-left hover:bg-white disabled:opacity-60"
                                 >
                                   {c.canonical_title}
-                                  <span className="text-zinc-500">
-                                    {" "}
-                                    · {c.occurrence_count}
-                                  </span>
+                                  <span className="text-ink/40"> · {c.occurrence_count}</span>
                                 </button>
                               </li>
                             ))}
@@ -524,29 +516,26 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
                               value={newClusterTitle}
                               onChange={(e) => setNewClusterTitle(e.target.value)}
                               placeholder={t("clusterNewPlaceholder")}
-                              className="min-w-[12rem] flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900"
+                              className="rf-input min-w-[12rem] flex-1"
                             />
                             <button
                               type="button"
                               disabled={clusterBusy}
                               onClick={() => void applyNewCluster(problem.id)}
-                              className="rounded-md bg-zinc-900 px-3 py-1.5 text-white hover:bg-zinc-800 disabled:opacity-60"
+                              className="rf-btn-primary px-3 py-1.5"
                             >
                               {t("clusterCreate")}
                             </button>
                             <button
                               type="button"
                               onClick={() => setEditingClusterFor(null)}
-                              className="text-zinc-600 hover:text-zinc-950"
+                              className="font-semibold text-ink/50 hover:text-ink"
                             >
                               {t("clusterCancel")}
                             </button>
                           </div>
                         </div>
                       ) : null}
-                      <blockquote className="mt-2 border-l-2 border-zinc-300 pl-3 text-sm text-zinc-600">
-                        {problem.source_quote}
-                      </blockquote>
                     </div>
                     {ready ? (
                       <button
@@ -554,96 +543,77 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
                         onClick={() =>
                           setDiscardedProblems((prev) => new Set(prev).add(problem.id))
                         }
-                        className="shrink-0 text-sm text-zinc-500 hover:text-red-600"
+                        className="shrink-0 text-sm font-semibold text-ink/30 hover:text-coral"
+                        aria-label={t("removeProblem")}
                       >
-                        {t("removeProblem")}
+                        ×
                       </button>
                     ) : null}
                   </div>
 
                   {visibleActions.length > 0 ? (
-                    <div className="space-y-3">
-                      <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-500">
-                        {t("actionsHeading")}
-                      </h3>
-                      <ul className="space-y-4">
-                        {visibleActions.map((action) => {
-                          const edit = actionEdits[action.id];
-                          return (
-                            <li
-                              key={action.id}
-                              className="space-y-3 rounded-md border border-zinc-200 bg-zinc-50 p-3 text-sm"
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <p className="font-medium text-zinc-900">{action.title}</p>
-                                  <p className="mt-1 text-zinc-700">{action.description}</p>
-                                </div>
-                                {ready ? (
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setDiscardedActions((prev) =>
-                                        new Set(prev).add(action.id),
-                                      )
-                                    }
-                                    className="shrink-0 text-sm text-zinc-500 hover:text-red-600"
-                                  >
-                                    {t("removeAction")}
-                                  </button>
-                                ) : null}
-                              </div>
+                    <ul className="space-y-2 pl-10">
+                      {visibleActions.map((action) => {
+                        const edit = actionEdits[action.id];
+                        return (
+                          <li key={action.id} className="rounded-2xl bg-sand/50 p-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="text-sm font-bold text-ink">{action.title}</p>
+                              {ready ? (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setDiscardedActions((prev) => new Set(prev).add(action.id))
+                                  }
+                                  className="shrink-0 text-sm font-semibold text-ink/30 hover:text-coral"
+                                  aria-label={t("removeAction")}
+                                >
+                                  ×
+                                </button>
+                              ) : null}
+                            </div>
 
-                              {ready && edit ? (
-                                <div className="grid gap-3 sm:grid-cols-3">
-                                  <label className="block space-y-1">
-                                    <span className="text-xs text-zinc-500">{t("owner")}</span>
-                                    <input
-                                      value={edit.owner}
-                                      onChange={(e) =>
-                                        updateAction(action.id, { owner: e.target.value })
-                                      }
-                                      className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-zinc-900"
-                                      placeholder={t("ownerPlaceholder")}
-                                    />
-                                  </label>
-                                  <label className="block space-y-1">
-                                    <span className="text-xs text-zinc-500">{t("dueDate")}</span>
-                                    <input
-                                      type="date"
-                                      value={edit.due_date}
-                                      onChange={(e) =>
-                                        updateAction(action.id, { due_date: e.target.value })
-                                      }
-                                      className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-zinc-900"
-                                    />
-                                  </label>
-                                  <label className="block space-y-1 sm:col-span-3">
-                                    <span className="text-xs text-zinc-500">
-                                      {t("successCriteria")}
-                                    </span>
-                                    <input
-                                      value={edit.success_criteria}
-                                      onChange={(e) =>
-                                        updateAction(action.id, {
-                                          success_criteria: e.target.value,
-                                        })
-                                      }
-                                      className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm outline-none focus:border-zinc-900"
-                                    />
-                                  </label>
-                                </div>
-                              ) : (
-                                <p className="text-zinc-600">
-                                  <span className="font-medium">{t("successCriteria")}: </span>
-                                  {action.suggested_success_criteria}
-                                </p>
-                              )}
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
+                            {ready && edit ? (
+                              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                                <input
+                                  value={edit.owner}
+                                  onChange={(e) =>
+                                    updateAction(action.id, { owner: e.target.value })
+                                  }
+                                  className="rf-input py-2"
+                                  placeholder={t("owner")}
+                                  aria-label={t("owner")}
+                                />
+                                <input
+                                  type="date"
+                                  value={edit.due_date}
+                                  onChange={(e) =>
+                                    updateAction(action.id, { due_date: e.target.value })
+                                  }
+                                  className="rf-input py-2"
+                                  aria-label={t("dueDate")}
+                                />
+                                <input
+                                  value={edit.success_criteria}
+                                  onChange={(e) =>
+                                    updateAction(action.id, {
+                                      success_criteria: e.target.value,
+                                    })
+                                  }
+                                  className="rf-input py-2 sm:col-span-1"
+                                  placeholder={t("successCriteria")}
+                                  aria-label={t("successCriteria")}
+                                />
+                              </div>
+                            ) : action.suggested_success_criteria ? (
+                              <p className="mt-1 text-xs font-medium text-ink/45">
+                                {action.suggested_success_criteria}
+                              </p>
+                            ) : null}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   ) : null}
                 </li>
               );
@@ -653,26 +623,29 @@ export function RetroConfirmView({ retroId }: RetroConfirmViewProps) {
       ) : null}
 
       {ready ? (
-        <div className="flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-6">
-          <button
-            type="button"
-            disabled={publishing || analyzing}
-            onClick={() => void onPublish()}
-            className="rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
-            {publishing ? t("publishing") : t("publish")}
-          </button>
-          <button
-            type="button"
-            disabled={publishing || analyzing}
-            onClick={() => void onRetryAnalyze()}
-            className="rounded-md border border-zinc-300 bg-white px-4 py-2.5 text-sm font-medium text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
-          >
-            {analyzing ? t("analyzing") : t("retryAnalyze")}
-          </button>
-          <Link href="/retros" className="text-sm text-zinc-600 hover:text-zinc-950">
-            {t("saveForLater")}
-          </Link>
+        <div className="sticky bottom-0 z-10 -mx-6 border-t border-ink/8 bg-cream/95 px-6 py-4 backdrop-blur-sm lg:-mx-10 lg:px-10">
+          <div className="mx-auto flex max-w-[960px] flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={publishing || analyzing}
+              onClick={() => void onPublish()}
+              className="rf-btn-primary px-5 py-2.5"
+            >
+              {publishing ? t("publishing") : t("publish")}
+            </button>
+            <button
+              type="button"
+              disabled={publishing || analyzing}
+              onClick={() => void onRetryAnalyze()}
+              className="rf-btn-secondary px-5 py-2.5"
+            >
+              {analyzing ? t("analyzing") : t("retryAnalyze")}
+            </button>
+            <Link href="/retros" className="text-sm font-semibold text-ink/50 hover:text-ink">
+              {t("saveForLater")}
+            </Link>
+            <p className="w-full text-xs font-medium text-ink/40">{t("publishHint")}</p>
+          </div>
         </div>
       ) : null}
     </div>

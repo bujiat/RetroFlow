@@ -28,10 +28,42 @@
     "checking": "Checking sign-in…"
   },
   "home": {
+    "badge": "Meeting retro studio",
     "title": "Stop solving the same problem in every retrospective",
+    "titleLead": "Stop solving the same problem",
+    "titleAccent": "in every retrospective",
     "subtitle": "Detect recurring problems · track improvements · verify with evidence",
     "ctaPrimary": "Get Started",
     "ctaSecondary": "View Demo",
+    "ctaStripEyebrow": "From notes to verification",
+    "ctaStripTitle": "Make every meeting leave actions you can actually follow",
+    "featuresHeading": "What it keeps in view",
+    "features": [
+      {
+        "icon": "🔁",
+        "color": "#FF6B4A",
+        "title": "Spot repeats",
+        "desc": "Match this meeting’s problems to similar themes in your history."
+      },
+      {
+        "icon": "🎯",
+        "color": "#FFB830",
+        "title": "Track actions",
+        "desc": "Owner, due date, and status live on one board — not lost in notes."
+      },
+      {
+        "icon": "✅",
+        "color": "#3ECFA0",
+        "title": "Verify with evidence",
+        "desc": "Done isn’t closed. Links and notes must be submitted before verify."
+      },
+      {
+        "icon": "🤖",
+        "color": "#7C5CBF",
+        "title": "Ask your history",
+        "desc": "Questions search only your retros and actions, with citations."
+      }
+    ],
     "demoAccount": "Demo: demo@example.com / demo1234",
     "questions": [
       "Has this happened before?",
@@ -56,6 +88,9 @@
     "demoAskA": "The last fix only updated the PR template; CI still lacks a migration gate, and the evidence is not verified yet."
   },
   "auth": {
+    "welcomeBack": "Welcome back",
+    "createAccount": "Create an account",
+    "quoteMark": "“",
     "loginTitle": "Log in",
     "registerTitle": "Sign up",
     "email": "Email",
@@ -78,11 +113,19 @@
   },
   "retros": {
     "title": "Retros",
+    "countLine": "{count} retros",
     "empty": "No retros yet",
-    "new": "New",
+    "new": "New retro",
     "publish": "Publish",
     "loading": "Loading…",
-    "loadFailed": "Failed to load retros. Please try again."
+    "loadFailed": "Failed to load retros. Please try again.",
+    "status": {
+      "draft": "Draft",
+      "analyzing": "Analyzing",
+      "analysis_failed": "Failed",
+      "ready_for_review": "Ready",
+      "published": "Published"
+    }
   },
   "retroNew": {
     "pageTitle": "New retro",
@@ -113,8 +156,8 @@
     "keepHeading": "Keep doing",
     "decisionsHeading": "Decisions",
     "risksHeading": "Risks",
-    "problemsHeading": "Problems & candidate actions",
-    "actionsHeading": "Candidate actions",
+    "problemsHeading": "Problems",
+    "actionsHeading": "Actions",
     "successCriteria": "Success criteria",
     "analyzeFailed": "Analysis failed. Please retry.",
     "analyzeFailedHint": "Analysis failed",
@@ -123,15 +166,15 @@
     "noAnalysisYet": "Not analyzed yet",
     "analyzingStuckHint": "Analysis may have stalled — retry",
     "llmNotConfigured": "LLM is not configured: set LLM_API_KEY in apps/api/.env and restart the API",
-    "removeProblem": "Remove problem",
-    "removeAction": "Remove action",
+    "removeProblem": "Remove",
+    "removeAction": "Remove",
     "owner": "Owner",
     "ownerPlaceholder": "Name or email",
     "dueDate": "Due date",
     "publish": "Publish actions",
     "publishing": "Publishing…",
     "saveForLater": "Save for later",
-    "publishHint": "Publish up to 3 actions. Each needs owner, due date, and success criteria.",
+    "publishHint": "Up to 3 actions. Each needs owner, due date, and success criteria.",
     "extractEmptyTitle": "Nothing was extracted",
     "extractEmptyHint": "The notes may be too short, or they don't mention concrete problems and actions. Add more detail and retry analysis.",
     "publishFieldsRequired": "Fill owner, due date, and success criteria for each action to publish",
@@ -186,27 +229,39 @@
     "showTimeline": "Show timeline",
     "hideTimeline": "Hide timeline",
     "actionFailed": "Action failed. Please retry.",
-    "eventsFailed": "Failed to load timeline"
+    "eventsFailed": "Failed to load timeline",
+    "progress": "Verified {done} / {total}",
+    "weekWatch": "{count} items to watch this week",
+    "status": {
+      "open": "Open",
+      "in_progress": "In progress",
+      "evidence_submitted": "Awaiting verify",
+      "verified": "Done",
+      "cancelled": "Cancelled"
+    }
   },
   "trends": {
     "title": "Improvement trends",
+    "lede": "See whether retros and actions actually landed",
     "loading": "Loading…",
     "loadFailed": "Failed to load trends. Please try again.",
-    "overdue": "Overdue actions",
-    "awaitingVerify": "Awaiting verification",
-    "verificationRate": "Verification rate",
-    "awaitingWork": "In progress / open",
+    "overdue": "Overdue",
+    "awaitingVerify": "Awaiting verify",
+    "verificationRate": "Verified rate",
+    "awaitingWork": "In progress",
     "verified": "Verified",
     "cancelled": "Cancelled",
     "publishedRetros": "Published retros",
-    "keptProblems": "Kept problem occurrences",
+    "keptProblems": "Kept problems",
     "recurringClusters": "Recurring themes",
-    "topClusters": "Problem themes (by occurrences)",
+    "mixTitle": "Action completion",
+    "clusterChartTitle": "Theme occurrences",
+    "topClusters": "Problem themes",
     "noClusters": "No themes yet",
     "occurrenceCount": "{count}×",
-    "overdueList": "Overdue list",
+    "overdueList": "Overdue",
     "noOverdue": "No overdue actions",
-    "goActions": "Go to actions →",
+    "goActions": "Actions →",
     "due": "Due"
   },
   "assistant": {
@@ -230,27 +285,42 @@
     }
   },
   "weeklyReview": {
-    "title": "AI weekly review",
+    "title": "AI weekly report",
+    "aiBadge": "AI generated · this week's facts",
+    "lede": "Synthesized from this week's retros and actions",
     "thisWeek": "This week",
     "backWeek": "← Actions",
     "loading": "Loading…",
     "loadFailed": "Failed to load weekly review",
-    "emptyHint": "No saved review for this week yet.",
-    "emptyHint2": "Generate a draft from this week's facts, edit it, then save.",
+    "emptyHint": "No report for this week yet.",
+    "emptyHint2": "Generate a draft from this week's facts, then edit and save.",
     "generate": "Generate",
     "regenerate": "Regenerate",
     "regenConfirm": "Regenerate will discard unsaved edits. Continue?",
     "edit": "Edit",
     "contentLabel": "Weekly review content",
-    "save": "Save this week",
+    "save": "Save",
     "generateFailed": "Generate failed. Please retry.",
     "saveFailed": "Save failed. Please retry.",
     "emptyContent": "Content cannot be empty",
-    "draftBadge": "Draft (not saved)",
+    "draftBadge": "Draft",
     "savedBadge": "Saved",
-    "insufficientEvidence": "Not enough facts this week; the draft has limited evidence.",
+    "insufficientEvidence": "Not enough facts this week.",
+    "metricVerified": "Verified",
+    "metricOverdue": "Overdue",
+    "metricAwaiting": "Awaiting",
+    "metricSources": "Sources",
+    "hlCompleted": "Wins this week",
+    "hlRisks": "Blockers",
+    "hlRecurring": "Repeats",
+    "insightsTitle": "AI insights",
+    "insightsCount": "{count} sources",
+    "badgeTrend": "Trend",
+    "badgeAdvice": "AI note",
+    "badgeNote": "Worth a look",
+    "nextWeekTitle": "Focus next week",
     "citations": "Sources",
-    "openSource": "Open source →"
+    "openSource": "Open"
   }
 }
 

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import {
   getMyWeek,
   listActionEvents,
@@ -114,24 +114,67 @@ export function ActionsBoard() {
     week.due_this_week.length === 0 &&
     week.awaiting_verify.length === 0;
 
+  const allCount = items?.length ?? 0;
+  const verifiedCount = items?.filter((row) => row.status === "verified").length ?? 0;
+  const progressPct = allCount > 0 ? Math.round((verifiedCount / allCount) * 100) : 0;
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-950">{t("title")}</h1>
-        <div className="flex items-center gap-4 text-sm">
-          <Link href="/weekly-review" className="text-zinc-600 hover:text-zinc-950">
-            {t("goWeeklyReview")}
-          </Link>
-          <Link href="/retros" className="text-zinc-600 hover:text-zinc-950">
-            {t("backRetros")}
-          </Link>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="rf-h1">{t("title")} 🎯</h1>
+          {tab === "all" && items && items.length > 0 ? (
+            <p className="rf-lede mt-1">
+              <span className="font-bold text-mint">{verifiedCount}</span>
+              {" / "}
+              {allCount}
+            </p>
+          ) : null}
         </div>
       </div>
+
+      {tab === "all" && items && items.length > 0 ? (
+        <div className="rf-card flex flex-col gap-5 p-5 sm:flex-row sm:items-center">
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex items-center justify-between text-sm font-bold text-ink">
+              <span>{t("progress", { done: verifiedCount, total: allCount })}</span>
+              <span className="font-display text-xl font-medium text-coral">{progressPct}%</span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-ink/10">
+              <div
+                className="h-full rounded-full bg-linear-to-r from-coral to-sun"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-5">
+            <MiniStat
+              n={items.filter((row) => row.status === "in_progress").length}
+              label={t("status.in_progress")}
+              color="#FF6B4A"
+            />
+            <MiniStat
+              n={items.filter((row) => row.status === "open").length}
+              label={t("status.open")}
+              color="rgba(45,31,20,0.35)"
+            />
+            <MiniStat n={verifiedCount} label={t("status.verified")} color="#3ECFA0" />
+          </div>
+        </div>
+      ) : null}
+
+      {tab === "week" && week && !weekEmpty ? (
+        <div className="rf-card flex flex-wrap gap-6 p-5">
+          <MiniStat n={week.overdue.length} label={t("sectionOverdue")} color="#FF6B4A" />
+          <MiniStat n={week.due_this_week.length} label={t("sectionDueThisWeek")} color="#FFB830" />
+          <MiniStat n={week.awaiting_verify.length} label={t("sectionAwaitingVerify")} color="#3ECFA0" />
+        </div>
+      ) : null}
 
       <div
         role="tablist"
         aria-label={t("title")}
-        className="flex gap-1 border-b border-zinc-200 text-sm"
+        className="flex w-fit gap-1 rounded-full bg-sand p-1 text-sm"
       >
         <TabButton active={tab === "week"} onClick={() => setTab("week")}>
           {t("tabWeek")}
@@ -142,16 +185,19 @@ export function ActionsBoard() {
       </div>
 
       {error ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm font-semibold text-coral">
           {error}
         </p>
       ) : null}
 
       {tab === "week" ? (
         week === null ? (
-          <p className="text-sm text-zinc-500">{t("loading")}</p>
+          <p className="rf-lede">{t("loading")}</p>
         ) : weekEmpty ? (
-          <p className="text-sm text-zinc-600">{t("weekEmpty")}</p>
+          <div className="rf-card px-6 py-12 text-center">
+            <p className="text-4xl">🎯</p>
+            <p className="rf-lede mt-3">{t("weekEmpty")}</p>
+          </div>
         ) : (
           <div className="space-y-8">
             <WeekSection
@@ -175,11 +221,14 @@ export function ActionsBoard() {
           </div>
         )
       ) : items === null ? (
-        <p className="text-sm text-zinc-500">{t("loading")}</p>
+        <p className="rf-lede">{t("loading")}</p>
       ) : items.length === 0 ? (
-        <p className="text-sm text-zinc-600">{t("empty")}</p>
+        <div className="rf-card px-6 py-12 text-center">
+          <p className="text-4xl">🎯</p>
+          <p className="rf-lede mt-3">{t("empty")}</p>
+        </div>
       ) : (
-        <ul className="divide-y border-y border-zinc-200">
+        <ul className="grid gap-3">
           {items.map((item) => (
             <ActionRow
               key={item.id}
@@ -190,6 +239,17 @@ export function ActionsBoard() {
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function MiniStat({ n, label, color }: { n: number; label: string; color: string }) {
+  return (
+    <div className="text-center">
+      <div className="font-display text-2xl leading-none" style={{ color }}>
+        {n}
+      </div>
+      <div className="mt-1 text-[11px] font-semibold text-ink/45">{label}</div>
     </div>
   );
 }
@@ -211,8 +271,8 @@ function TabButton({
       onClick={onClick}
       className={
         active
-          ? "-mb-px border-b-2 border-zinc-950 px-3 py-2 font-medium text-zinc-950"
-          : "px-3 py-2 text-zinc-500 hover:text-zinc-800"
+          ? "rounded-full bg-white px-4 py-2 font-bold text-ink shadow-sm"
+          : "rounded-full px-4 py-2 font-medium text-ink/45 hover:text-ink"
       }
     >
       {children}
@@ -233,12 +293,12 @@ function WeekSection({
 }) {
   if (items.length === 0) return null;
   return (
-    <section className="space-y-2">
-      <h2 className="text-sm font-medium text-zinc-800">
+    <section className="space-y-3">
+      <h2 className="font-display text-lg font-medium text-ink">
         {title}
-        <span className="ml-2 font-normal text-zinc-500">{items.length}</span>
+        <span className="ml-2 text-base font-medium text-ink/40">{items.length}</span>
       </h2>
-      <ul className="divide-y border-y border-zinc-200">
+      <ul className="grid gap-3">
         {items.map((item) => (
           <ActionRow
             key={item.id}
@@ -307,23 +367,77 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
   }
 
   const terminal = item.status === "verified" || item.status === "cancelled";
+  const done = item.status === "verified";
+  const ownerInitial = (item.owner.trim()[0] ?? "?").toUpperCase();
+  const avatarHue =
+    ["#FF6B4A", "#FFB830", "#3ECFA0", "#7C5CBF", "#4AAFFF"][
+      Array.from(item.owner).reduce((sum, ch) => sum + ch.charCodeAt(0), 0) % 5
+    ];
+  const statusChip =
+    item.status === "verified"
+      ? { bg: "rgba(62,207,160,0.15)", color: "#2a9a74" }
+      : item.status === "evidence_submitted"
+        ? { bg: "rgba(255,184,48,0.18)", color: "#c48410" }
+        : item.status === "in_progress"
+          ? { bg: "rgba(74,175,255,0.15)", color: "#2b7ec4" }
+          : item.status === "cancelled"
+            ? { bg: "rgba(45,31,20,0.08)", color: "#8a7a6e" }
+            : { bg: "rgba(255,107,74,0.12)", color: "#e04a2c" };
+  const statusKey =
+    item.status === "open" ||
+    item.status === "in_progress" ||
+    item.status === "evidence_submitted" ||
+    item.status === "verified" ||
+    item.status === "cancelled"
+      ? item.status
+      : null;
 
   return (
-    <li className="space-y-3 py-4">
-      <div className="space-y-1">
-        <p className="font-medium text-zinc-950">{item.title}</p>
-        <p className="text-sm text-zinc-600">{item.description}</p>
-        <p className="text-sm text-zinc-500">
-          {item.owner} · {t("due")} {item.due_date} · {item.status}
-        </p>
-        <p className="text-sm text-zinc-600">
-          <span className="font-medium">{t("successCriteria")}: </span>
-          {item.success_criteria}
-        </p>
+    <li
+      className="rf-card space-y-3 p-5"
+      style={
+        done
+          ? { background: "rgba(62,207,160,0.04)", borderColor: "rgba(62,207,160,0.2)" }
+          : undefined
+      }
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className="rf-check mt-0.5"
+          style={
+            done
+              ? { background: "#3ECFA0", color: "white" }
+              : { border: "2px solid rgba(45,31,20,0.15)", color: "transparent" }
+          }
+          aria-hidden
+        >
+          {done ? "✓" : ""}
+        </span>
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex items-start justify-between gap-3">
+            <p className={`font-extrabold text-ink ${done ? "line-through opacity-50" : ""}`}>
+              {item.title}
+            </p>
+            <span className="rf-avatar" style={{ background: avatarHue }} title={item.owner}>
+              {ownerInitial}
+            </span>
+          </div>
+          <p className="flex flex-wrap items-center gap-2 text-sm font-medium text-ink/45">
+            <span>
+              {t("due")} {item.due_date}
+            </span>
+            <span
+              className="rf-chip"
+              style={{ background: statusChip.bg, color: statusChip.color }}
+            >
+              {statusKey ? t(`status.${statusKey}`) : item.status}
+            </span>
+          </p>
+        </div>
       </div>
 
       {rowError ? (
-        <p role="alert" className="text-sm text-red-600">
+        <p role="alert" className="text-sm font-semibold text-coral">
           {rowError}
         </p>
       ) : null}
@@ -335,7 +449,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
               type="button"
               disabled={pending}
               onClick={() => void run(() => patchActionStatus(item.id, "in_progress"))}
-              className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+              className="rf-btn-primary px-4 py-1.5"
             >
               {t("start")}
             </button>
@@ -346,7 +460,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
               type="button"
               disabled={pending}
               onClick={() => void run(() => patchActionStatus(item.id, "open"))}
-              className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
+              className="rf-btn-secondary px-3 py-1.5 disabled:opacity-60"
             >
               {t("backToOpen")}
             </button>
@@ -361,7 +475,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
                   setShowEvidence((v) => !v);
                   setShowReject(false);
                 }}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
+                className="rf-btn-secondary px-3 py-1.5 disabled:opacity-60"
               >
                 {t("submitEvidence")}
               </button>
@@ -369,7 +483,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
                 type="button"
                 disabled={pending}
                 onClick={() => void run(() => patchActionStatus(item.id, "cancelled"))}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50 disabled:opacity-60"
+                className="rf-btn-secondary px-3 py-1.5 text-ink/60 disabled:opacity-60"
               >
                 {t("cancel")}
               </button>
@@ -382,7 +496,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
                 type="button"
                 disabled={pending}
                 onClick={() => void run(() => verifyAction(item.id))}
-                className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
+                className="rf-btn-primary px-4 py-1.5"
               >
                 {t("verify")}
               </button>
@@ -393,7 +507,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
                   setShowReject((v) => !v);
                   setShowEvidence(false);
                 }}
-                className="rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-60"
+                className="rf-btn-secondary px-3 py-1.5 disabled:opacity-60"
               >
                 {t("reject")}
               </button>
@@ -404,7 +518,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
             type="button"
             disabled={pending}
             onClick={() => void loadEvents()}
-            className="rounded-md border border-transparent px-3 py-1.5 text-sm text-zinc-600 hover:text-zinc-950"
+            className="px-3 py-1.5 text-sm font-semibold text-ink/50 hover:text-ink"
           >
             {events ? t("hideTimeline") : t("showTimeline")}
           </button>
@@ -413,7 +527,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
         <button
           type="button"
           onClick={() => void loadEvents()}
-          className="text-sm text-zinc-600 hover:text-zinc-950"
+          className="text-sm font-semibold text-ink/50 hover:text-ink"
         >
           {events ? t("hideTimeline") : t("showTimeline")}
         </button>
@@ -421,7 +535,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
 
       {showEvidence ? (
         <form
-          className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3"
+          className="space-y-2 rounded-2xl bg-sand/60 p-3"
           onSubmit={(e) => {
             e.preventDefault();
             if (!evidenceText.trim() && !evidenceUrl.trim()) {
@@ -438,39 +552,35 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
           }}
         >
           <label className="block space-y-1 text-sm">
-            <span className="font-medium text-zinc-800">{t("completionNote")}</span>
+            <span className="font-bold text-ink">{t("completionNote")}</span>
             <textarea
               required
               value={note}
               onChange={(e) => setNote(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900"
+              className="rf-input"
             />
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium text-zinc-800">{t("evidenceText")}</span>
+            <span className="font-bold text-ink">{t("evidenceText")}</span>
             <textarea
               value={evidenceText}
               onChange={(e) => setEvidenceText(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900"
+              className="rf-input"
             />
           </label>
           <label className="block space-y-1 text-sm">
-            <span className="font-medium text-zinc-800">{t("evidenceUrl")}</span>
+            <span className="font-bold text-ink">{t("evidenceUrl")}</span>
             <input
               value={evidenceUrl}
               onChange={(e) => setEvidenceUrl(e.target.value)}
               placeholder="https://"
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900"
+              className="rf-input"
             />
           </label>
-          <p className="text-xs text-zinc-500">{t("evidenceHint")}</p>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
+          <p className="text-xs font-medium text-ink/40">{t("evidenceHint")}</p>
+          <button type="submit" disabled={pending} className="rf-btn-primary px-4 py-1.5">
             {t("applyVerify")}
           </button>
         </form>
@@ -478,37 +588,33 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
 
       {showReject ? (
         <form
-          className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3"
+          className="space-y-2 rounded-2xl bg-sand/60 p-3"
           onSubmit={(e) => {
             e.preventDefault();
             void run(() => rejectAction(item.id, rejectReason));
           }}
         >
           <label className="block space-y-1 text-sm">
-            <span className="font-medium text-zinc-800">{t("rejectReason")}</span>
+            <span className="font-bold text-ink">{t("rejectReason")}</span>
             <textarea
               required
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
               rows={2}
-              className="w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 outline-none focus:border-zinc-900"
+              className="rf-input"
             />
           </label>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-zinc-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-          >
+          <button type="submit" disabled={pending} className="rf-btn-primary px-4 py-1.5">
             {t("confirmReject")}
           </button>
         </form>
       ) : null}
 
       {events ? (
-        <ol className="space-y-2 border-l border-zinc-200 pl-3 text-sm text-zinc-600">
+        <ol className="space-y-2 border-l-2 border-ink/10 pl-3 text-sm text-ink/60">
           {events.map((ev) => (
             <li key={ev.id}>
-              <span className="font-medium text-zinc-800">{ev.event_type}</span>
+              <span className="font-bold text-ink">{ev.event_type}</span>
               {ev.from_status || ev.to_status
                 ? ` · ${ev.from_status ?? "—"} → ${ev.to_status ?? "—"}`
                 : null}
@@ -519,7 +625,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
                   href={ev.evidence_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-zinc-900 underline-offset-2 hover:underline"
+                  className="font-semibold text-coral underline-offset-2 hover:underline"
                 >
                   {ev.evidence_url}
                 </a>

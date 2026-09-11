@@ -90,24 +90,26 @@ export function NewRetroForm() {
     phase === "analyzing" ? t("analyzing") : phase === "saving" ? t("saving") : t("submitAnalyze");
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="space-y-6">
       <div>
-        <Link href="/retros" className="text-sm text-zinc-600 hover:text-zinc-950">
+        <Link href="/retros" className="text-sm font-semibold text-ink/50 hover:text-ink">
           {t("back")}
         </Link>
-        <h1 className="mt-3 text-xl font-semibold tracking-tight text-zinc-950">
-          {t("pageTitle")}
-        </h1>
+        <h1 className="rf-h1 mt-3">{t("pageTitle")}</h1>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-5">
+      <form onSubmit={onSubmit} className="rf-card space-y-5 p-6">
         <fieldset className="space-y-2">
-          <legend className="text-sm font-medium text-zinc-900">{t("typeLabel")}</legend>
-          <div className="flex flex-wrap gap-4">
+          <legend className="text-sm font-bold text-ink">{t("typeLabel")}</legend>
+          <div className="flex flex-wrap gap-3">
             {typeOptions.map((option) => (
               <label
                 key={option.value}
-                className="flex cursor-pointer items-center gap-2 text-sm text-zinc-800"
+                className={`cursor-pointer rounded-full px-4 py-2 text-sm font-semibold ${
+                  type === option.value
+                    ? "bg-ink text-cream"
+                    : "border-2 border-ink/10 bg-white text-ink"
+                }`}
               >
                 <input
                   type="radio"
@@ -115,7 +117,9 @@ export function NewRetroForm() {
                   value={option.value}
                   checked={type === option.value}
                   onChange={() => setType(option.value)}
+                  className="sr-only"
                 />
+                {option.value === "sprint" ? "🚀 " : option.value === "incident" ? "⚙️ " : "🎨 "}
                 {option.label}
               </label>
             ))}
@@ -123,7 +127,7 @@ export function NewRetroForm() {
         </fieldset>
 
         <div className="space-y-1.5">
-          <label htmlFor={titleId} className="block text-sm font-medium text-zinc-900">
+          <label htmlFor={titleId} className="block text-sm font-bold text-ink">
             {t("titleLabel")}
           </label>
           <input
@@ -132,13 +136,13 @@ export function NewRetroForm() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={200}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+            className="rf-input"
             autoComplete="off"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor={dateId} className="block text-sm font-medium text-zinc-900">
+          <label htmlFor={dateId} className="block text-sm font-bold text-ink">
             {t("dateLabel")}
           </label>
           <input
@@ -146,12 +150,12 @@ export function NewRetroForm() {
             type="date"
             value={reviewDate}
             onChange={(e) => setReviewDate(e.target.value)}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+            className="rf-input"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor={contentId} className="block text-sm font-medium text-zinc-900">
+          <label htmlFor={contentId} className="block text-sm font-bold text-ink">
             {t("contentLabel")}
           </label>
           <textarea
@@ -160,17 +164,13 @@ export function NewRetroForm() {
             onChange={(e) => setRawContent(e.target.value)}
             rows={12}
             placeholder={t("contentPlaceholder")}
-            className="w-full resize-y rounded-md border border-zinc-300 px-3 py-2 text-sm outline-none focus:border-zinc-900"
+            className="rf-input resize-y"
           />
         </div>
 
-        {error ? <p className="text-sm text-red-600">{error}</p> : null}
+        {error ? <p className="text-sm font-semibold text-coral">{error}</p> : null}
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="w-full rounded-md bg-zinc-900 px-3 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-60"
-        >
+        <button type="submit" disabled={pending} className="rf-btn-primary w-full py-3">
           {pending ? submitLabel : t("submitAnalyze")}
         </button>
       </form>
