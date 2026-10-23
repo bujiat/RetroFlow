@@ -128,3 +128,43 @@ export async function apiRequest<T>(
 
   return response.json() as Promise<T>;
 }
+
+export function isAbortError(err: unknown): boolean {
+  return err instanceof Error && err.name === "AbortError";
+}
+
+/** POST that returns the raw response so the caller can read an SSE body. */
+export async function openApiStream(
+  path: string,
+  body: unknown,
+  fallbackError: string,
+  signal?: AbortSignal,
+): Promise<Response> {
+  const headers: HeadersInit = {
+    Accept: "text/event-stream",
+    "Content-Type": "application/json",
+  };
+  const token = getAccessToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${apiBaseUrl()}${path}`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(body),
+    cache: "no-store",
+    signal,
+  }).catch((err: unknown) => {
+    if (isAbortError(err)) throw err;
+    throw new ApiError(0, "network_error", "network_error");
+  });
+
+  if (!response.ok) {
+    throw await parseError(response, fallbackError);
+  }
+  if (!response.body) {
+    throw new ApiError(0, "empty_stream", fallbackError);
+  }
+  return response;
+}

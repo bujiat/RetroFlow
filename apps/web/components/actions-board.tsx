@@ -11,10 +11,12 @@ import {
   patchActionStatus,
   rejectAction,
   submitEvidence,
+  suggestVerification,
   verifyAction,
   type ActionEvent,
   type ActionItem,
   type MyWeek,
+  type VerifySuggestion,
 } from "@/lib/api/actions";
 import { failedRequestMessage, redirectToLoginIfUnauthorized } from "@/lib/api/client";
 
@@ -330,6 +332,7 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
   const [evidenceUrl, setEvidenceUrl] = useState("");
   const [rejectReason, setRejectReason] = useState("");
   const [events, setEvents] = useState<ActionEvent[] | null>(null);
+  const [suggestion, setSuggestion] = useState<VerifySuggestion | null>(null);
 
   async function run(fn: () => Promise<ActionItem>) {
     setPending(true);
@@ -353,6 +356,19 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
     }
   }
 
+  async function suggest() {
+    setPending(true);
+    setRowError(null);
+    setSuggestion(null);
+    try {
+      setSuggestion(await suggestVerification(item.id));
+    } catch (err) {
+      if (redirectToLoginIfUnauthorized(err, router.replace)) return;
+      setRowError(t("suggestFailed"));
+    } finally {
+      setPending(false);
+    }
+  }
   async function loadEvents() {
     if (events) {
       setEvents(null);
@@ -495,6 +511,14 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
               <button
                 type="button"
                 disabled={pending}
+                onClick={() => void suggest()}
+                className="rf-btn-secondary px-3 py-1.5 disabled:opacity-60"
+              >
+                {t("suggest")}
+              </button>
+              <button
+                type="button"
+                disabled={pending}
                 onClick={() => void run(() => verifyAction(item.id))}
                 className="rf-btn-primary px-4 py-1.5"
               >
@@ -532,6 +556,21 @@ function ActionRow({ item, onUpdated, onNeedReload }: ActionRowProps) {
           {events ? t("hideTimeline") : t("showTimeline")}
         </button>
       )}
+
+      {suggestion && item.status === "evidence_submitted" ? (
+        <div className="space-y-2 rounded-2xl bg-sand/60 p-3 text-sm">
+          <p className="font-bold text-ink">
+            {suggestion.decision === "pass" ? t("suggestPass") : t("suggestReject")}
+          </p>
+          <p className="text-ink/80">{suggestion.reason}</p>
+          <ul className="list-disc space-y-1 pl-4 text-ink/60">
+            {suggestion.evidence.map((quote, index) => (
+              <li key={`${quote}-${index}`}>{quote}</li>
+            ))}
+          </ul>
+          <p className="text-xs font-medium text-ink/40">{t("suggestHint")}</p>
+        </div>
+      ) : null}
 
       {showEvidence ? (
         <form

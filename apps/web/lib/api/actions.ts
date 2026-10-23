@@ -64,3 +64,18 @@ export function rejectAction(id: string, reject_reason: string): Promise<ActionI
     fallbackError: "reject_action_failed",
   });
 }
+
+export type VerifySuggestion = {
+  action_id: string;
+  action_status: string;
+  decision: "pass" | "reject";
+  reason: string;
+  evidence: string[];
+};
+
+export function suggestVerification(id: string): Promise<VerifySuggestion> {
+  return apiRequest<VerifySuggestion>(`/actions/${id}/verify-suggestion`, {
+    method: "POST",
+    fallbackError: "verify_suggestion_failed",
+  });
+}

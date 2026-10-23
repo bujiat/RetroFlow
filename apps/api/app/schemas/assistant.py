@@ -10,7 +10,7 @@ class AssistantQueryRequest(BaseModel):
 
 class AssistantCitation(BaseModel):
     id: str
-    source_type: Literal["action", "cluster", "chunk", "problem"]
+    source_type: Literal["action", "cluster", "chunk", "problem", "pull_request"]
     title: str
     excerpt: str
     retro_id: UUID | None = None

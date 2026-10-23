@@ -13,7 +13,7 @@ from app.providers import embedding as embedding_provider
 from app.providers import llm as llm_provider
 from app.providers.prompts import ASSISTANT_SYSTEM_PROMPT, build_assistant_user_prompt
 from app.repositories import assistant as assistant_repo
-from app.repositories import chunks as chunks_repo
+from app.retrieval.search import retrieve_chunks
 from app.schemas.assistant import (
     AssistantCitation,
     AssistantQueryRequest,
@@ -37,18 +37,9 @@ def query_assistant(
         raise api_error(status.HTTP_400_BAD_REQUEST, "question_too_short")
 
     try:
-        query_vector = embedding_provider.embed_texts([question])[0]
+        scored = retrieve_chunks(db, user_id=user.id, query=question)
     except embedding_provider.EmbeddingError as exc:
         raise api_error(status.HTTP_502_BAD_GATEWAY, exc.message) from exc
-
-    scored = chunks_repo.search_chunks(
-        db,
-        user_id=user.id,
-        vector=query_vector,
-        limit=settings.rag_retrieval_top_k,
-    )
-    scored = [(c, s) for c, s in scored if s >= settings.rag_min_score]
-    scored = scored[: settings.rag_context_top_k]
 
     if not scored:
         return AssistantQueryResponse(
