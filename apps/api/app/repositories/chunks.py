@@ -84,6 +84,15 @@ def replace_chunks_for_retro(
     return len(pieces)
 
 
+def chunks_for_user_statement(user_id: UUID):
+    return select(ContentChunk).where(ContentChunk.user_id == user_id)
+
+
+def list_chunks_for_user(db: Session, *, user_id: UUID) -> list[ContentChunk]:
+    """Every stored chunk owned by this user. BM25 is computed on this list only."""
+    return list(db.scalars(chunks_for_user_statement(user_id)).all())
+
+
 def search_chunks(
     db: Session,
     *,

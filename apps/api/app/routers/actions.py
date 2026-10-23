@@ -13,8 +13,10 @@ from app.schemas.actions import (
     PatchActionRequest,
     RejectActionRequest,
     SubmitEvidenceRequest,
+    VerifySuggestionOut,
 )
 from app.services import actions as actions_service
+from app.services.verify_suggestion import suggest_verification
 
 router = APIRouter(prefix="/actions", tags=["actions"])
 
@@ -62,6 +64,15 @@ def submit_evidence(
     current_user: User = Depends(get_current_user),
 ) -> ActionItemOut:
     return actions_service.submit_evidence(db, current_user, action_id, payload)
+
+
+@router.post("/{action_id}/verify-suggestion", response_model=VerifySuggestionOut)
+def verify_suggestion(
+    action_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> VerifySuggestionOut:
+    return suggest_verification(db, current_user, action_id)
 
 
 @router.post("/{action_id}/verify", response_model=ActionItemOut)

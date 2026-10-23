@@ -52,6 +52,21 @@ class SubmitEvidenceRequest(BaseModel):
         return self
 
 
+class VerifySuggestionOut(BaseModel):
+    action_id: UUID
+    action_status: str
+    decision: str
+    reason: str
+    evidence: list[str]
+
+    @field_validator("decision")
+    @classmethod
+    def allowed_decision(cls, value: str) -> str:
+        if value not in {"pass", "reject"}:
+            raise ValueError("invalid decision")
+        return value
+
+
 class RejectActionRequest(BaseModel):
     reject_reason: str = Field(min_length=1, max_length=2000)
 

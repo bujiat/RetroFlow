@@ -84,6 +84,34 @@ def list_action_items_for_user(db: Session, user_id: UUID) -> list[ActionItem]:
     return list(db.scalars(stmt).all())
 
 
+def latest_action_for_cluster(
+    db: Session,
+    *,
+    user_id: UUID,
+    cluster_id: UUID,
+) -> ActionItem | None:
+    """Newest action tied to a kept problem in this user's cluster."""
+    return db.scalars(latest_action_statement(user_id, cluster_id)).first()
+
+
+def latest_action_statement(user_id: UUID, cluster_id: UUID):
+    return (
+        select(ActionItem)
+        .join(
+            ProblemOccurrence,
+            ActionItem.problem_occurrence_id == ProblemOccurrence.id,
+        )
+        .where(
+            ActionItem.user_id == user_id,
+            ProblemOccurrence.user_id == user_id,
+            ProblemOccurrence.cluster_id == cluster_id,
+            ProblemOccurrence.disposition == "kept",
+        )
+        .order_by(ActionItem.created_at.desc())
+        .limit(1)
+    )
+
+
 def get_action_for_user(
     db: Session,
     *,

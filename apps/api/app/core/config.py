@@ -1,4 +1,4 @@
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _DEVELOPMENT_JWT_SECRET = "dev-change-me"
@@ -37,6 +37,23 @@ class Settings(BaseSettings):
     rag_context_top_k: int = 5
     rag_min_score: float = 0.32
     rag_max_citations: int = 5
+    rag_mode: str = "hybrid"
+    rag_rrf_k: int = Field(default=60, ge=1)
+
+    github_token: str = ""
+    github_api_base: str = "https://api.github.com"
+    github_timeout_seconds: float = 10.0
+
+    # Cursor MCP 只读工具绑定的账号。工具参数里不能传 user_id。
+    mcp_user_email: str = ""
+
+    @field_validator("rag_mode")
+    @classmethod
+    def normalize_rag_mode(cls, value: str) -> str:
+        cleaned = value.strip().lower()
+        if cleaned not in {"vector", "hybrid"}:
+            raise ValueError("rag_mode must be vector or hybrid")
+        return cleaned
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":

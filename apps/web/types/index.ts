@@ -119,7 +119,7 @@ export type TrendsSummary = {
 
 export type AssistantCitation = {
   id: string;
-  source_type: "action" | "cluster" | "chunk" | "problem";
+  source_type: "action" | "cluster" | "chunk" | "problem" | "pull_request";
   title: string;
   excerpt: string;
   retro_id?: string | null;
@@ -131,6 +131,59 @@ export type AssistantQueryResponse = {
   status: "answered" | "insufficient_evidence";
   answer: string;
   citations: AssistantCitation[];
+};
+
+export type AgentAnswerStatus =
+  | "answered"
+  | "insufficient_evidence"
+  | "max_steps"
+  | "tool_failures";
+
+export type AgentAnswer = {
+  status: AgentAnswerStatus;
+  answer: string;
+  citations: AssistantCitation[];
+  runId: string | null;
+};
+
+export type PendingOperation = {
+  id: string;
+  tool_name: string;
+  summary: string;
+  expires_at: string;
+};
+
+export type AgentRunSummary = {
+  id: string;
+  kind: string;
+  status: string;
+  question: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  duration_ms: number;
+  created_at: string;
+};
+
+export type AgentRunList = {
+  items: AgentRunSummary[];
+  limited: boolean;
+};
+
+export type AgentStepRecord = {
+  step_index: number;
+  step_type: string;
+  tool_name: string | null;
+  arguments: Record<string, unknown> | null;
+  result_summary: string | null;
+  error: string | null;
+  prompt_tokens: number;
+  completion_tokens: number;
+  duration_ms: number;
+};
+
+export type AgentRunDetail = AgentRunSummary & {
+  output: string | null;
+  steps: AgentStepRecord[];
 };
 
 export type WeeklyReviewCitation = {

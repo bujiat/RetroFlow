@@ -1,12 +1,14 @@
-from datetime import UTC, datetime, timedelta
-from uuid import UUID
+from datetime import UTC, date, datetime, timedelta
+from uuid import UUID, uuid4
 
 from fastapi import status
 from sqlalchemy.orm import Session
 
 from app.core.errors import api_error
+from app.models.action_item import ActionItem
 from app.models.user import User
 from app.repositories import actions as actions_repo
+from app.repositories import analysis as analysis_repo
 from app.schemas.actions import (
     ActionEventOut,
     ActionItemOut,
@@ -25,6 +27,18 @@ _PATCH_TRANSITIONS = {
 }
 
 _ACTIVE = frozenset({"open", "in_progress"})
+
+
+def proposed_change_is_allowed(current_status: str, change: str) -> bool:
+    if change == "start":
+        return (current_status, "in_progress") in _PATCH_TRANSITIONS
+    if change == "reopen":
+        return (current_status, "open") in _PATCH_TRANSITIONS
+    if change == "cancel":
+        return (current_status, "cancelled") in _PATCH_TRANSITIONS
+    if change in {"verify", "reject"}:
+        return current_status == "evidence_submitted"
+    return False
 
 
 def list_actions(db: Session, user: User) -> list[ActionItemOut]:
@@ -178,3 +192,64 @@ def _get(db: Session, user: User, action_id: UUID):
     if item is None:
         raise api_error(status.HTTP_404_NOT_FOUND, "action_not_found")
     return item
+
+
+def create_action_for_problem(
+    db: Session,
+    user: User,
+    *,
+    problem_id: UUID,
+    title: str,
+    description: str,
+    owner: str,
+    due_date: date,
+    success_criteria: str,
+) -> ActionItemOut:
+    problem = analysis_repo.get_problem_for_user(db, user_id=user.id, problem_id=problem_id)
+    if problem is None or problem.disposition != "kept":
+        raise api_error(status.HTTP_404_NOT_FOUND, "problem_not_found")
+    item = ActionItem(
+        id=uuid4(),
+        user_id=user.id,
+        retro_id=problem.retro_id,
+        problem_occurrence_id=problem.id,
+        title=title,
+        description=description,
+        owner=owner,
+        due_date=due_date,
+        success_criteria=success_criteria,
+        status="open",
+    )
+    db.add(item)
+    db.flush()
+    actions_repo.add_event(
+        db,
+        user_id=user.id,
+        action_id=item.id,
+        event_type="created",
+        from_status=None,
+        to_status="open",
+    )
+    db.commit()
+    db.refresh(item)
+    return ActionItemOut.model_validate(item)
+
+
+def apply_proposed_status_change(
+    db: Session,
+    user: User,
+    arguments: dict[str, object],
+) -> ActionItemOut:
+    action_id = UUID(str(arguments["action_id"]))
+    change = str(arguments["change"])
+    if change == "verify":
+        return verify_action(db, user, action_id)
+    if change == "reject":
+        return reject_action(
+            db,
+            user,
+            action_id,
+            RejectActionRequest(reject_reason=str(arguments.get("reason") or "")),
+        )
+    target = {"start": "in_progress", "reopen": "open", "cancel": "cancelled"}[change]
+    return patch_action(db, user, action_id, PatchActionRequest(status=target))

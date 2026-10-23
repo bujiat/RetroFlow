@@ -8,7 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.db import SessionLocal
-from app.routers import actions, assistant, auth, health, problems, retros, trends, weekly_reviews
+from app.routers import (
+    actions,
+    agent,
+    assistant,
+    auth,
+    health,
+    problems,
+    retros,
+    trends,
+    weekly_reviews,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -47,4 +57,5 @@ app.include_router(actions.router, prefix="/api/v1")
 app.include_router(problems.router, prefix="/api/v1")
 app.include_router(trends.router, prefix="/api/v1")
 app.include_router(assistant.router, prefix="/api/v1")
+app.include_router(agent.router, prefix="/api/v1")
 app.include_router(weekly_reviews.router, prefix="/api/v1")

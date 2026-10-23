@@ -9,16 +9,10 @@ from app.models.retro import Retro
 from app.models.user import User
 from app.providers import embedding as embedding_provider
 from app.providers import llm as llm_provider
-from app.providers.prompts import (
-    ANALYSIS_SYSTEM_PROMPT,
-    build_analysis_user_prompt,
-    build_repair_user_prompt,
-)
 from app.repositories import actions as actions_repo
 from app.repositories import analysis as analysis_repo
 from app.repositories import clusters as clusters_repo
 from app.repositories import retros as retros_repo
-from app.schemas.analysis import LlmAnalysisResult
 from app.schemas.retros import (
     CreateRetroRequest,
     PublishRetroRequest,
@@ -26,6 +20,7 @@ from app.schemas.retros import (
     RetroListItem,
 )
 from app.services import indexing as indexing_service
+from app.workflows.analysis import run_analysis_workflow
 
 # analyzing 也可重入：进程中断时可能卡在 analyzing，需能重试
 ANALYZABLE_STATUSES = {"draft", "analyzing", "analysis_failed", "ready_for_review"}
@@ -68,19 +63,15 @@ def analyze_retro(db: Session, user: User, retro_id: UUID) -> RetroDetail:
     retro.analysis_error = None
     db.commit()
 
-    user_prompt = build_analysis_user_prompt(
-        retro_type=retro.type,
-        title=retro.title,
-        review_date=retro.review_date.isoformat(),
-        raw_content=retro.raw_content,
-    )
-    messages = [
-        {"role": "system", "content": ANALYSIS_SYSTEM_PROMPT},
-        {"role": "user", "content": user_prompt},
-    ]
-
     try:
-        analysis = _run_llm_analysis(messages)
+        analysis = run_analysis_workflow(
+            db,
+            user_id=user.id,
+            retro_type=retro.type,
+            title=retro.title,
+            review_date=retro.review_date.isoformat(),
+            raw_content=retro.raw_content,
+        )
         problems, _drafts = analysis_repo.replace_analysis_results(
             db,
             user_id=user.id,
@@ -193,29 +184,6 @@ def publish_retro(
     db.commit()
     db.refresh(retro)
     return _detail(db, user.id, retro)
-
-
-def _run_llm_analysis(messages: list[dict[str, str]]) -> LlmAnalysisResult:
-    raw = llm_provider.chat_json(messages)
-    try:
-        return LlmAnalysisResult.model_validate_json(raw)
-    except ValidationError as first_error:
-        repair_messages = [
-            *messages,
-            {"role": "assistant", "content": raw},
-            {
-                "role": "user",
-                "content": build_repair_user_prompt(
-                    previous_output=raw,
-                    validation_error=str(first_error),
-                ),
-            },
-        ]
-        repaired = llm_provider.chat_json(repair_messages)
-        try:
-            return LlmAnalysisResult.model_validate_json(repaired)
-        except ValidationError as second_error:
-            raise second_error from first_error
 
 
 def _mark_failed(db: Session, retro: Retro, code: str) -> None:

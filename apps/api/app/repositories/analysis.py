@@ -25,6 +25,18 @@ def list_problems_for_retro(
     return list(db.scalars(stmt).all())
 
 
+def get_problem_for_user(
+    db: Session,
+    *,
+    user_id: UUID,
+    problem_id: UUID,
+) -> ProblemOccurrence | None:
+    row = db.get(ProblemOccurrence, problem_id)
+    if row is None or row.user_id != user_id:
+        return None
+    return row
+
+
 def list_action_drafts_for_retro(
     db: Session,
     *,
